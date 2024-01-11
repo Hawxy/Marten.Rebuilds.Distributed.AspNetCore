@@ -26,7 +26,7 @@ The cores pieces are:
 - This is unlikely to work with multi-database configurations.
 
 ### Future
-- A wolverine implementation would be nice.
+- A wolverine implementation would be useful.
 
 ### Running
 1. `docker-compose up`
@@ -34,3 +34,4 @@ The cores pieces are:
 3. `dotnet run --urls=http://localhost:5012/` (this order is important - the UI is configured to connect to this node)
 4. `rebuild-ui` folder -> 'npm i' -> 'npm run dev'
 5. Use the UI to seed some data, then you should be good to test a rebuild. 
+6. You can test the middleware by attempting to seed an entity during a rebuild, your console should show a 503 exception.

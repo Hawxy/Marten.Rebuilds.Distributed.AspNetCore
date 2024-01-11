@@ -42,9 +42,11 @@ public sealed class LocalDaemon(IDocumentStore store, IEnumerable<IHostedService
 
     public bool IsCurrentNodeDaemon()
     {
+        // If tracker is null or HWM reports as zero then this node does not have a running daemon.
         if (store.Storage.Database.Tracker is null || store.Storage.Database.Tracker.HighWaterMark == 0)
             return false;
         
+        // To be absolutely sure, we check if the coordinator's timer is null. If it is, this node has the lock. (a better API here would be nice).
         return !IsHotColdCoordinatorWaiting(_service.Coordinators.Single());
     }
 

@@ -47,13 +47,9 @@ builder.Services.AddCors(options =>
       
 });
 
-
-builder.Services.AddHttpLogging((_) => {});
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-app.UseHttpLogging();
 
 app.UseCors();
 

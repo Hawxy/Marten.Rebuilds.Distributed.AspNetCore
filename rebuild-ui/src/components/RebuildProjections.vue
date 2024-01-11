@@ -1,15 +1,15 @@
 <template>
   <v-container>
-    <v-row>
-      <v-col cols="3">
-        <v-btn :disabled="loading" @click="seedMutation.mutate" :loading="seedMutation.isPending.value">Seed 100k Entities</v-btn>
-      </v-col>
+    <v-row justify="start">
+      <v-btn :disabled="loading" @click="seedMutation.mutate" :loading="seedMutation.isPending.value" class="mr-4">Seed 100k Entities</v-btn>
+      <v-btn @click="addEntity.mutate">Seed 1 Entity</v-btn>
+      <v-spacer/>
     </v-row>
     <v-row justify="center">
       <v-col>
         <h1>Rebuild Projections</h1>
 
-        <v-alert prominent :type="computedState.type">
+        <v-alert prominent :type="computedState.type" class="mb-3">
           <template v-if="computedState.loading" #prepend>
             <v-progress-circular class="mr-2" indeterminate color="yellow" />
           </template>
@@ -146,6 +146,8 @@ const loading = computed(() => rebuildMutation.isPending.value || computedState.
 
 
 const seedMutation = useMutation({ mutationFn: (p: string[]) => http('seed').post(p).res()})
+
+const addEntity = useMutation({ mutationFn: (p: string[]) => http('add').post(p).res()})
 
 watch(
   () => currentRebuildStatus,
