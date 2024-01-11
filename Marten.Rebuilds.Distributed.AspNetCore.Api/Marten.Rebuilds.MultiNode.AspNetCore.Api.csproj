@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>1bb24875-4c36-4998-a8c0-461dabc5fffa</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Marten.Rebuilds.Distributed.AspNetCore\Marten.Rebuilds.MultiNode.AspNetCore.csproj" />
+  </ItemGroup>
+
+</Project>
