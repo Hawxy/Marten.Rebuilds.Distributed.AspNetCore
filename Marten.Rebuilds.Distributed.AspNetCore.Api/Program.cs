@@ -11,17 +11,16 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("Postgres")!);
+
 builder.Services.AddMarten(_ =>
 {
-    _.Connection(builder.Configuration.GetConnectionString("Postgres")!);
-    
     _.CreateDatabasesForTenants(c =>
     {
         c.ForTenant()
             .CheckAgainstPgDatabase()
             .WithEncoding("UTF-8")
             .ConnectionLimit(-1);
-
     });
     
     _.Projections.Add<WeatherProjection>(ProjectionLifecycle.Async);
@@ -30,6 +29,7 @@ builder.Services.AddMarten(_ =>
 
 }).AddAsyncDaemon(DaemonMode.HotCold)
     .UseLightweightSessions()
+    .UseNpgsqlDataSource()
     .ApplyAllDatabaseChangesOnStartup()
     .OptimizeArtifactWorkflow();
 

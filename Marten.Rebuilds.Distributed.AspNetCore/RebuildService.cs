@@ -56,7 +56,7 @@ public sealed class RebuildService(
             {
                 await cache.SetRebuildRunning(projection);
                 // Caution: shard timeout needs to be increased if single projection rebuilds exceed 10 minutes.
-                await daemon.RebuildProjection(projection, TimeSpan.FromMinutes(10), CancellationToken.None);
+                await daemon.RebuildProjectionAsync(projection, TimeSpan.FromMinutes(10), CancellationToken.None);
             }
 
             stopwatch.Stop();
@@ -82,7 +82,7 @@ public sealed class RebuildService(
                 logger.LogInformation("Rebuilding finished in {time}. Projections rebuilt: {projections}", stopwatch.Elapsed.ToString("g"), projectionsFormatted);
             }
             
-            await daemon.StopAll();
+            await daemon.StopAllAsync();
             await localDaemon.StartAsync();
         }
     }

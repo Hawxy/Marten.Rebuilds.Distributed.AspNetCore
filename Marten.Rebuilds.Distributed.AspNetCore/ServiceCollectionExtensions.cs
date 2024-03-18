@@ -11,19 +11,18 @@ public static class ServiceCollectionExtensions
 {
     public static void AddFusionCache(this WebApplicationBuilder builder)
     {
-        // exclude these when environment != production, only included for demo purposes
+        // exclude Redis when environment != production, only included for demo purposes
         builder.Services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = builder.Configuration.GetConnectionString("Redis");
-        });
-
-        builder.Services.AddFusionCacheSystemTextJsonSerializer();
-
+        }); 
+        
         builder.Services.AddFusionCacheStackExchangeRedisBackplane(options =>
         {
             options.Configuration = builder.Configuration.GetConnectionString("Redis");
         });
         
+        builder.Services.AddFusionCacheSystemTextJsonSerializer();
         builder.Services.AddFusionCache().TryWithAutoSetup();
     }
 
@@ -37,7 +36,7 @@ public static class ServiceCollectionExtensions
                 cfg.Host(builder.Configuration.GetConnectionString("RabbitMq"));
 
                 // each node requires its own endpoint as all endpoints need to receive the message.
-                cfg.ReceiveEndpoint(new TemporaryEndpointDefinition("rebuild"),e=>
+                cfg.ReceiveEndpoint(new TemporaryEndpointDefinition("rebuild", 1),e=>
                 {
                     e.Exclusive = true;
                     e.ConfigureConsumer<RebuildConsumer>(context);

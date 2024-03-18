@@ -11,4 +11,8 @@
     <ProjectReference Include="..\Marten.Rebuilds.Distributed.AspNetCore\Marten.Rebuilds.MultiNode.AspNetCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Npgsql.DependencyInjection" Version="8.0.2" />
+  </ItemGroup>
+
 </Project>
