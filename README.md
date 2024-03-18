@@ -18,6 +18,14 @@ The cores pieces are:
 - FusionCache providing a pub/sub distributed cache that can communicate our rebuild state across all nodes.
 - ASP.NET Core middleware that blocks Post/Delete/Patch/Put methods into the system.
 
+### Running
+1. `docker-compose up`
+2. `dotnet run --urls=http://localhost:5011/`
+3. `dotnet run --urls=http://localhost:5012/` (this order is important - the UI is configured to connect to this node)
+4. `rebuild-ui` folder -> `npm i` -> `npm run dev`
+5. Use the UI to seed some data, then you should be good to test a rebuild. 
+6. You can test the middleware by attempting to seed an entity during a rebuild, your console should show a 503.
+
 ### Limitations
 - The "rebuild running" state is set to expire after x minutes (currently 10) so the cache returns to a good state after something goes wrong.
   If a single projection takes longer than this, you should increase this value.
@@ -27,11 +35,3 @@ The cores pieces are:
 
 ### Future
 - A wolverine implementation would be useful.
-
-### Running
-1. `docker-compose up`
-2. `dotnet run --urls=http://localhost:5011/`
-3. `dotnet run --urls=http://localhost:5012/` (this order is important - the UI is configured to connect to this node)
-4. `rebuild-ui` folder -> `npm i` -> `npm run dev`
-5. Use the UI to seed some data, then you should be good to test a rebuild. 
-6. You can test the middleware by attempting to seed an entity during a rebuild, your console should show a 503.
