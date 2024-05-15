@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   rabbitmq:
-    container_name: rabbitmq
+    container_name: rabbitmq-dist
     image: rabbitmq:3-management-alpine
     hostname: rabbitmq
     restart: always
@@ -15,7 +15,7 @@ services:
     
 
   cache:
-    container_name: redis
+    container_name: redis-dist
     image: redis:7
     restart: always
     ports:
@@ -25,7 +25,7 @@ services:
       - cache:/data
 
   db:
-    container_name: db
+    container_name: db-dist
     image: postgres:latest
     restart: always
     environment:

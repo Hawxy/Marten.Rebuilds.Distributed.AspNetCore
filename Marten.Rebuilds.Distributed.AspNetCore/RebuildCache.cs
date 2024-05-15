@@ -6,6 +6,14 @@ public sealed class RebuildCache(IFusionCache cache) : IRebuildCache
 {
     private const string RebuildCacheKey = nameof(RebuildCache);
 
+    public async ValueTask SetRebuildPending()
+    {
+        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, new RebuildRunning("**PENDING**"), options =>
+        {
+            options.Duration = TimeSpan.FromSeconds(10);
+        });
+    }
+
     public async ValueTask SetRebuildRunning(string projection)
     {
         await cache.SetAsync<RebuildStatus>(RebuildCacheKey, new RebuildRunning(projection), options =>
@@ -49,6 +57,7 @@ public sealed class RebuildCache(IFusionCache cache) : IRebuildCache
 
 public interface IRebuildCache
 {
+    ValueTask SetRebuildPending();
     ValueTask SetRebuildRunning(string projection);
 
     ValueTask SetErrored(string description);

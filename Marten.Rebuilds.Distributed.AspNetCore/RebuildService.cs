@@ -37,8 +37,8 @@ public sealed class RebuildService(
     {
         if (!localDaemon.IsCurrentNodeDaemon())
             return;
-        
-        await cache.SetRebuildRunning("**PENDING**");
+
+        await cache.SetRebuildPending();
         await localDaemon.StopAsync();
         
         var projectionsFormatted = string.Join(',', projections);
@@ -69,7 +69,6 @@ public sealed class RebuildService(
         }
         finally
         {
-            // Note: I discovered after writing this code that daemon exceptions are not reported via the listener at all, much to the dismay of our QA team. So at the moment this doesn't do anything.
             var innerEx = listener.GetException();
             if (innerEx is not null)
             {

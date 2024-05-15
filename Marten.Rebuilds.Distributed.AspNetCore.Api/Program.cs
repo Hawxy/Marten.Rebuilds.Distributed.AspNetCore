@@ -5,9 +5,18 @@ using Marten.Rebuilds.MultiNode.AspNetCore;
 using Marten.Rebuilds.MultiNode.AspNetCore.Api;
 using Marten.Services.Json;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
+using Serilog.Events;
 using Weasel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) => configuration.MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft.Extensions.Http", LogEventLevel.Warning)
+    .MinimumLevel.Override("Npgsql.Command", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Async(a => a.Console()));
 
 // Add services to the container.
 
@@ -25,7 +34,7 @@ builder.Services.AddMarten(_ =>
     
     _.Projections.Add<WeatherProjection>(ProjectionLifecycle.Async);
     
-    _.UseDefaultSerialization(EnumStorage.AsString, serializerType: SerializerType.SystemTextJson);
+    _.UseSystemTextJsonForSerialization(EnumStorage.AsString);
 
 }).AddAsyncDaemon(DaemonMode.HotCold)
     .UseLightweightSessions()
@@ -50,7 +59,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
+app.UseSerilogRequestLogging();
 app.UseCors();
 
 // middleware should go after authentication/authorization

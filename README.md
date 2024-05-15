@@ -29,8 +29,6 @@ The cores pieces are:
 ### Limitations
 - The "rebuild running" state is set to expire after x minutes (currently 10) so the cache returns to a good state after something goes wrong.
   If a single projection takes longer than this, you should increase this value.
-- Some rebuild errors do not get bubbled up or reported to an attached listener, 
-  so the UI rebuild state may show a successful rebuild occurred, when in fact it failed.
 - ~~This is unlikely to work with multi-database configurations.~~ In theory this should work fine in Marten v7, but it's untested.
 
 ### Future
