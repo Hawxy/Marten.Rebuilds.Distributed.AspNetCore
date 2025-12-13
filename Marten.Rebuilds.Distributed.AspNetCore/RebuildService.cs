@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
-using Marten.Events.Daemon;
-using Marten.Events.Daemon.Resiliency;
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
 using Marten.Rebuilds.MultiNode.AspNetCore.Messaging;
 using MassTransit;
 using Microsoft.Extensions.Logging;

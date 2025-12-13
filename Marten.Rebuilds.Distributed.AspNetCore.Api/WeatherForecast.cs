@@ -12,7 +12,7 @@ public sealed class Weather
     public string? Summary { get; set; }
 }
 
-public sealed class WeatherProjection : SingleStreamProjection<Weather>
+public sealed class WeatherProjection : SingleStreamProjection<Weather, Guid>
 {
     public WeatherProjection()
     {

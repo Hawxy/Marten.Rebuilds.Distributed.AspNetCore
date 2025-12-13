@@ -1,9 +1,8 @@
+using JasperFx.Events.Daemon;
+using JasperFx.Events.Projections;
 using Marten;
-using Marten.Events.Daemon.Resiliency;
-using Marten.Events.Projections;
 using Marten.Rebuilds.MultiNode.AspNetCore;
 using Marten.Rebuilds.MultiNode.AspNetCore.Api;
-using Marten.Services.Json;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Serilog.Events;
@@ -23,24 +22,23 @@ builder.Host.UseSerilog((context, configuration) => configuration.MinimumLevel.I
 builder.Services.AddNpgsqlDataSource(builder.Configuration.GetConnectionString("Postgres")!);
 
 builder.Services.AddMarten(_ =>
-{
-    _.CreateDatabasesForTenants(c =>
     {
-        c.ForTenant()
-            .CheckAgainstPgDatabase()
-            .WithEncoding("UTF-8")
-            .ConnectionLimit(-1);
-    });
-    
-    _.Projections.Add<WeatherProjection>(ProjectionLifecycle.Async);
-    
-    _.UseSystemTextJsonForSerialization(EnumStorage.AsString);
+        _.CreateDatabasesForTenants(c =>
+        {
+            c.ForTenant()
+                .CheckAgainstPgDatabase()
+                .WithEncoding("UTF-8")
+                .ConnectionLimit(-1);
+        });
 
-}).AddAsyncDaemon(DaemonMode.HotCold)
+        _.Projections.Add<WeatherProjection>(ProjectionLifecycle.Async);
+
+        _.UseSystemTextJsonForSerialization(EnumStorage.AsString);
+
+    }).AddAsyncDaemon(DaemonMode.HotCold)
     .UseLightweightSessions()
     .UseNpgsqlDataSource()
-    .ApplyAllDatabaseChangesOnStartup()
-    .OptimizeArtifactWorkflow();
+    .ApplyAllDatabaseChangesOnStartup();
 
 builder.Services.AddRebuildMiddleware();
 builder.AddFusionCache();
@@ -69,7 +67,7 @@ var rebuild = app.MapGroup("rebuild");
 
 // get a list of rebuilds to show on the front end
 rebuild.MapGet("projections",
-    (IDocumentStore store) => store.Options.Events.Projections().Select(x => x.ProjectionName).ToArray());
+    (IDocumentStore store) => store.Options.Events.Projections().Select(x => x.Name).ToArray());
 
 // kick off the rebuild for a given projection
 rebuild.MapPost("run",
