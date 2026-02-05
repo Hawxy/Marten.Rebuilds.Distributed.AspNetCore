@@ -74,8 +74,22 @@ rebuild.MapPost("run",
     async ([FromServices] IRebuildService rebuildService, [FromBody] HashSet<string> projections) =>
     await rebuildService.RequestRebuild(projections));
 
-// display the current rebuild state to the user
-rebuild.MapGet("status", async ([FromServices] IRebuildCache cache) => await cache.GetCurrentState());
+rebuild.MapGet("status", ([FromServices] IRebuildCache cache, CancellationToken cancellationToken) =>
+{
+    async IAsyncEnumerable<RebuildStatus> StreamStatus()
+    {
+        yield return await cache.GetCurrentState();
+        
+        using var listener = new RebuildStateListener(cache);
+        
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            yield return await listener.GetNextUpdateAsync(cancellationToken);
+        }
+    }
+
+    return TypedResults.ServerSentEvents(StreamStatus());
+});
 
 // seed some example events
 app.MapPost("seed", async (IDocumentSession session) =>

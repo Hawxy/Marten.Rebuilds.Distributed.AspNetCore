@@ -38,6 +38,7 @@ import { useMutation, useQuery } from '@tanstack/vue-query';
 import { ref, watch } from 'vue';
 import { DateTime } from 'luxon';
 import { computed } from 'vue';
+import { useEventSource } from '@vueuse/core';
 
 interface RebuildUnknown {
   rebuildState: 'Unknown';
@@ -136,14 +137,13 @@ const rebuild = (requested: string[]) =>
     }
   });
 
-const { data: currentRebuildStatus } = useQuery({
-  queryKey: ['rebuildRunning'],
-  queryFn: () => http('rebuild/status').get().json<RebuildStatus>(),
-  refetchInterval: () => (rebuildStarted.value ? 2000 : 10000)
-});
+const { status, data: currentRebuildStatus, error, close } = useEventSource<never[], RebuildStatus>(`http://localhost:5012/rebuild/status`, [], {
+  serializer: {
+    read: (data) => JSON.parse(data!)
+  }
+})
 
 const loading = computed(() => rebuildMutation.isPending.value || computedState.value.loading)
-
 
 const seedMutation = useMutation({ mutationFn: (p: string[]) => http('seed').post(p).res()})
 

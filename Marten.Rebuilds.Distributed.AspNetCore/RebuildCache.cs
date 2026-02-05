@@ -5,42 +5,57 @@ namespace Marten.Rebuilds.MultiNode.AspNetCore;
 public sealed class RebuildCache(IFusionCache cache) : IRebuildCache
 {
     private const string RebuildCacheKey = nameof(RebuildCache);
-
+    public event EventHandler<RebuildStatus>? StatusUpdated;
+    
     public async ValueTask SetRebuildPending()
     {
-        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, new RebuildRunning("**PENDING**"), options =>
+        var state = new RebuildRunning("**PENDING**");
+        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, state, options =>
         {
             options.Duration = TimeSpan.FromSeconds(10);
         });
+        
+        StatusUpdated?.Invoke(this, state);
     }
 
     public async ValueTask SetRebuildRunning(string projection)
     {
-        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, new RebuildRunning(projection), options =>
+        var state = new RebuildRunning(projection);
+        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, state, options =>
         {
             // We want the system to default back to a good state within 10 minutes if something goes horrifically wrong for a given projection
             options.Duration = TimeSpan.FromMinutes(10);
         });
+
+        StatusUpdated?.Invoke(this, state);
     }
 
     public async ValueTask SetErrored(string exceptionType)
     {
         var currentStatus = await cache.GetOrDefaultAsync<RebuildStatus>(RebuildCacheKey);
 
-        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, new RebuildErrored(currentStatus is RebuildRunning running ? running.Projection : string.Empty, DateTimeOffset.UtcNow, exceptionType), options =>
+        var errorState = new RebuildErrored(currentStatus is RebuildRunning running ? running.Projection : string.Empty,
+            DateTimeOffset.UtcNow, exceptionType);
+
+        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, errorState, options =>
         {
             // Remove rebuild status after an hour
             options.Duration = TimeSpan.FromMinutes(60);
         });
+        
+        StatusUpdated?.Invoke(this, errorState);
     }
     
     public async ValueTask SetRebuildFinished(HashSet<string> projections, string timeTaken)
     {
-        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, new RebuildCompleted(projections, DateTimeOffset.UtcNow, timeTaken), options =>
+        var state = new RebuildCompleted(projections, DateTimeOffset.UtcNow, timeTaken);
+        await cache.SetAsync<RebuildStatus>(RebuildCacheKey, state, options =>
         {
             // Remove rebuild status after an hour
             options.Duration = TimeSpan.FromMinutes(60);
         });
+        
+        StatusUpdated?.Invoke(this, state);
     }
 
     public async ValueTask<bool> IsRebuilding()
@@ -57,6 +72,7 @@ public sealed class RebuildCache(IFusionCache cache) : IRebuildCache
 
 public interface IRebuildCache
 {
+    public event EventHandler<RebuildStatus>? StatusUpdated;
     ValueTask SetRebuildPending();
     ValueTask SetRebuildRunning(string projection);
 
